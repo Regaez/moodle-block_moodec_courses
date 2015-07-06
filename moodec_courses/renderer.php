@@ -22,12 +22,11 @@ class block_moodec_courses_renderer extends plugin_renderer_base {
      * @param   array   $products    The list of products to be output
      * @return  string              html to be displayed in moodec_courses block
      */
-    public function output_products($products) {
+    public function output_products($products, $config) {
         global $CFG;
         require_once($CFG->dirroot.'/local/moodec/lib.php');
 
         $html = '';
-        $config = get_config('block_moodec_courses');
 
         $count = count($products);
         
@@ -41,33 +40,63 @@ class block_moodec_courses_renderer extends plugin_renderer_base {
             $html .= '<div class="product-item">';
 
                 // Output image
-                $html .= sprintf(
-                    '<img class="product-image" src="%s" alt="%s">',
-                    local_moodec_get_course_image_url($p->courseid),
-                    $p->fullname
-                );
+                if((bool)$config->show_image) {
+                    $imageURL = local_moodec_get_course_image_url($p->courseid);
+
+                    if(!!$imageURL) {
+                        $html .= sprintf(
+                            '<img class="product-image" src="%s" alt="%s">',
+                            $imageURL,
+                            $p->fullname
+                        );
+                    }
+                }
 
                 // Output title
                 $html .= sprintf(
-                    '<h3 class="product-title">%s</h3>',
+                    '<h4 class="product-title">%s</h4>',
                     $p->fullname
                 );
 
                 // Output description
-                $html .= sprintf(
-                    '<div class="product-description">%s</div>',
-                    substr($p->summary, 0, 100) . '...'
-                );
+                if((bool)$config->show_description) {
+                    $html .= sprintf(
+                        '<div class="product-description">%s</div>',
+                        substr($p->summary, 0, 100) . '...'
+                    );
+                }
 
                 // Output price
-                $html .= sprintf(
-                    '<h4 class="product-price">%s</h4>',
-                    $p->price
-                );
+                if((bool)$config->show_price) {
+                    if( $p->pricing_model === 'simple') {
+                        // Output simple price
+                        $html .= sprintf(
+                            '<h5 class="product-price">$%s</h5>',
+                            $p->price
+                        );
+                    } else {
+                        // Get min and max variation prices
+                        $priceArray = array();
+
+                        foreach ($p->variations as $v) {
+                            $priceArray[] = $v->price;
+                        }
+
+                        $minPrice = min($priceArray);
+                        $maxPrice = max($priceArray);
+
+                        // Output variation price
+                        $html .= sprintf(
+                            '<h5 class="product-price">$%s - $%s</h5>',
+                            $minPrice,
+                            $maxPrice
+                        );
+                    }
+                }
 
                 // Output link to product
                 $html .= sprintf(
-                    '<a href="%s" class="product-link">%s</a>',
+                    '<a href="%s" class="product-link btn">%s</a>',
                     new moodle_url(
                         $CFG->wwwroot.'/local/moodec/pages/product.php',
                         array(
