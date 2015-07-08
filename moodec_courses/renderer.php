@@ -100,7 +100,7 @@ class block_moodec_courses_renderer extends plugin_renderer_base {
                     new moodle_url(
                         $CFG->wwwroot.'/local/moodec/pages/product.php',
                         array(
-                            'id'=> $p->id
+                            'id'=> $p->courseid
                         )
                     ),
                     get_string('product_link', 'block_moodec_courses')

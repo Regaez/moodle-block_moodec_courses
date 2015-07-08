@@ -98,7 +98,7 @@ class block_moodec_courses_edit_form extends block_edit_form {
         $products = local_moodec_get_products(null,'fullname', 'ASC', -1);
 
         foreach ($products as $p) {
-            $allProducts[$p->id] = $p->fullname;
+            $allProducts[$p->courseid] = $p->fullname;
         }
 
         // Add manual course selection 1
