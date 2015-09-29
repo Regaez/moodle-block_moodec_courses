@@ -41,13 +41,13 @@ class block_moodec_courses_renderer extends plugin_renderer_base {
 
                 // Output image
                 if((bool)$config->show_image) {
-                    $imageURL = local_moodec_get_course_image_url($p->courseid);
+                    $imageURL = $p->get_image_url();
 
                     if(!!$imageURL) {
                         $html .= sprintf(
                             '<img class="product-image" src="%s" alt="%s">',
                             $imageURL,
-                            $p->fullname
+                            $p->get_fullname()
                         );
                     }
                 }
@@ -55,31 +55,31 @@ class block_moodec_courses_renderer extends plugin_renderer_base {
                 // Output title
                 $html .= sprintf(
                     '<h4 class="product-title">%s</h4>',
-                    $p->fullname
+                    $p->get_fullname()
                 );
 
                 // Output description
                 if((bool)$config->show_description) {
                     $html .= sprintf(
                         '<div class="product-description">%s</div>',
-                        substr($p->summary, 0, 100) . '...'
+                        substr($p->get_summary(), 0, 100) . '...'
                     );
                 }
 
                 // Output price
                 if((bool)$config->show_price) {
-                    if( $p->pricing_model === 'simple') {
+                    if( $p->get_type() === PRODUCT_TYPE_SIMPLE) {
                         // Output simple price
                         $html .= sprintf(
                             '<h5 class="product-price">$%s</h5>',
-                            $p->price
+                            $p->get_price()
                         );
                     } else {
                         // Get min and max variation prices
                         $priceArray = array();
 
-                        foreach ($p->variations as $v) {
-                            $priceArray[] = $v->price;
+                        foreach ($p->get_variations() as $v) {
+                            $priceArray[] = $v->get_price();
                         }
 
                         $minPrice = min($priceArray);
@@ -100,7 +100,7 @@ class block_moodec_courses_renderer extends plugin_renderer_base {
                     new moodle_url(
                         $CFG->wwwroot.'/local/moodec/pages/product.php',
                         array(
-                            'id'=> $p->courseid
+                            'id'=> $p->get_id()
                         )
                     ),
                     get_string('product_link', 'block_moodec_courses')

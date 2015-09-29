@@ -95,10 +95,11 @@ class block_moodec_courses_edit_form extends block_edit_form {
         $mform->setType('config_course_selection', PARAM_INT);
 
         // Get all products and store in an array of ID and fullname
-        $products = local_moodec_get_products(null,'fullname', 'ASC', -1);
+        $products = local_moodec_get_products(-1, null,'fullname', 'ASC');
+        $allProducts = array();
 
         foreach ($products as $p) {
-            $allProducts[$p->courseid] = $p->fullname;
+            $allProducts[$p->get_id()] = $p->get_fullname();
         }
 
         // Add manual course selection 1
@@ -175,7 +176,7 @@ class block_moodec_courses_edit_form extends block_edit_form {
         $mform->disabledif('config_manual_course_4', 'config_courses_shown', 'eq', 3);
 
         $PAGE->requires->jquery();
-        $PAGE->requires->js(new moodle_url('blocks/moodec_courses/edit_form.js'));
+        $PAGE->requires->js(new moodle_url($CFG->wwwroot .'/blocks/moodec_courses/edit_form.js'));
 
     }
 
@@ -186,10 +187,22 @@ class block_moodec_courses_edit_form extends block_edit_form {
             $defaults->config_show_image        = !!$this->block->config->show_image;
             $defaults->config_show_description  = !!$this->block->config->show_description;
             $defaults->config_course_selection  = (int) $this->block->config->course_selection;
-            $defaults->config_manual_course_1   = (int) $this->block->config->manual_course_1;
-            $defaults->config_manual_course_2   = (int) $this->block->config->manual_course_2;
-            $defaults->config_manual_course_3   = (int) $this->block->config->manual_course_3;
-            $defaults->config_manual_course_4   = (int) $this->block->config->manual_course_4;
+
+            if( $defaults->config_course_selection  === 2 ) {
+                $defaults->config_manual_course_1   = (int) $this->block->config->manual_course_1;
+                
+                if( 1 < $defaults->config_courses_shown ) {
+                    $defaults->config_manual_course_2   = (int) $this->block->config->manual_course_2;
+                }
+                
+                if( 2 < $defaults->config_courses_shown ) {
+                    $defaults->config_manual_course_3   = (int) $this->block->config->manual_course_3;
+                }
+                
+                if( 3 < $defaults->config_courses_shown ) {
+                    $defaults->config_manual_course_4   = (int) $this->block->config->manual_course_4;
+                }
+            }
         }
 
        parent::set_data($defaults);

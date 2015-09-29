@@ -41,31 +41,32 @@ class block_moodec_courses extends block_base {
         $this->content->text = '';
         $this->content->footer = '';
 
-        // Check config for which courses to select
-        if( (int)$this->config->course_selection === 0) {
-            // Return latest courses
-            $products = local_moodec_get_products(null, 'timecreated', 'DESC', -1);
-            $products = array_slice($products, 0, $this->config->courses_shown);
-        } elseif( (int)$this->config->course_selection === 1 ) {
-            // Return random courses
-            $products = local_moodec_get_random_products($this->config->courses_shown);
-        } else {
-            // TODO: Add return manual courses
-            $products = array();
-            for($i = 1; $i <= $this->config->courses_shown; $i++) {
-                $manual = 'manual_course_'.$i;
-                $newProduct = local_moodec_get_product((int)$this->config->$manual);
-                if(!!$newProduct) {
-                    $products[] = $newProduct;
-                } 
+        if( !empty($this->config) ) {
+            
+            // Check config for which courses to select
+            if( (int)$this->config->course_selection === 0) {
+                // Return latest courses
+                $products = local_moodec_get_products(-1, null, 'timecreated', 'DESC');
+                $products = array_slice($products, 0, $this->config->courses_shown);
+            } elseif( (int)$this->config->course_selection === 1 ) {
+                // Return random courses
+                $products = local_moodec_get_random_products($this->config->courses_shown);
+            } else {
+                // TODO: Add return manual courses
+                $products = array();
+                for($i = 1; $i <= $this->config->courses_shown; $i++) {
+                    $manual = 'manual_course_'.$i;
+                    $newProduct = local_moodec_get_product((int)$this->config->$manual);
+                    if(!!$newProduct) {
+                        $products[] = $newProduct;
+                    } 
+                }
             }
+
+            // Render HTML
+            $renderer = $this->page->get_renderer('block_moodec_courses');
+            $this->content->text = $renderer->output_products($products, $this->config);        
         }
-
-        // var_dump($products);
-
-        // Render HTML
-        $renderer = $this->page->get_renderer('block_moodec_courses');
-        $this->content->text = $renderer->output_products($products, $this->config);        
 
         return $this->content;
     }
